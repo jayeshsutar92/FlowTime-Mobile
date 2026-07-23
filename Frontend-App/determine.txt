@@ -1,0 +1,150 @@
+﻿FlowTime React Native Project Audit
+===================================
+
+Scope and rule followed
+-----------------------
+- This audit inspected the React Native project only.
+- No source code, native config, package metadata, or architecture files were modified during this audit request.
+- The only file written for this request is this report: determine.txt.
+
+Files/config inspected
+----------------------
+- package.json
+- app.json
+- index.js
+- App.tsx
+- metro.config.js
+- babel.config.js
+- android/settings.gradle
+- android/build.gradle
+- android/app/build.gradle
+- android/gradle.properties
+- android/local.properties
+- android/app/src/main/AndroidManifest.xml
+- android/app/src/main/java/com/flowtime/MainApplication.kt
+- android/app/src/main/java/com/flowtime/MainActivity.kt
+- ios/Podfile
+- npx react-native config output
+- installed dependency metadata for react-native-gesture-handler, react-native-safe-area-context, react-native-screens, and react-native-svg
+- generated CMake build files under android/app/.cxx and node_modules/react-native-gesture-handler/android/.cxx
+
+1. Expo project or React Native CLI project?
+--------------------------------------------
+Conclusion: this is a React Native CLI project, not an Expo project.
+
+Evidence:
+- package.json scripts are CLI scripts:
+  - "android": "react-native run-android"
+  - "ios": "react-native run-ios"
+  - "start": "react-native start"
+- app.json is the basic RN CLI app.json:
+  - name: FlowTime
+  - displayName: FlowTime
+  It does not contain Expo app config fields such as expo.slug, expo.sdkVersion, plugins, android.package, ios.bundleIdentifier, etc.
+- There is no app.config.js/app.config.ts found in the project root.
+- There is no eas.json found in the project root.
+- index.js uses AppRegistry.registerComponent from react-native, not registerRootComponent from expo.
+- App.tsx imports React Navigation and native RN modules directly; it does not import Expo APIs.
+- android/ and ios/ native folders exist and are standard RN CLI native projects.
+- android/settings.gradle uses @react-native/gradle-plugin and com.facebook.react.settings.
+- android/app/build.gradle applies com.android.application, org.jetbrains.kotlin.android, and com.facebook.react.
+- ios/Podfile uses react-native/scripts/react_native_pods.rb and use_react_native! directly.
+
+Important caveat:
+- package.json currently has a top-level dependency on expo@^57.0.7.
+- npx react-native config shows expo is autolinked as a native dependency:
+  - android packageImportPath: import expo.modules.ExpoModulesPackage;
+  - android packageInstance: new ExpoModulesPackage()
+  - ios podspecPath: node_modules/expo/Expo.podspec
+- This does not make the app an Expo project. It means a CLI app currently has Expo installed and autolinked. For this app, no source file appears to use Expo APIs, so Expo is an unnecessary/mismatched dependency unless the project intentionally wants Expo Modules inside a bare RN app.
+
+2. What caused the build failure?
+---------------------------------
+Primary cause: React Native 0.86 New Architecture native/CMake linking for autolinked native modules on Android.
+
+Evidence from project and generated build files:
+- package.json uses react-native 0.86.0 and react 19.2.3.
+- android/app/src/main/java/com/flowtime/MainActivity.kt imports DefaultNewArchitectureEntryPoint.fabricEnabled and passes fabricEnabled to DefaultReactActivityDelegate.
+- android/app/src/main/java/com/flowtime/MainApplication.kt calls loadReactNative(this), matching the RN 0.86 New Architecture entrypoint style.
+- android/gradle.properties no longer contains an effective newArchEnabled=false setting. Even when it was attempted earlier, Gradle reported that newArchEnabled=false is no longer supported since RN 0.82 and New Architecture remains enabled by default.
+- npx react-native config shows New Architecture CMake/codegen metadata for native dependencies:
+  - react-native-gesture-handler has libraryName rngesturehandler_codegen and cmakeListsPath.
+  - react-native-safe-area-context has componentDescriptors and cmakeListsPath.
+  - react-native-screens has componentDescriptors and cmakeListsPath.
+  - react-native-svg has componentDescriptors and cmakeListsPath.
+  - expo is also autolinked because it is a top-level dependency.
+- The observed Android failure is in CMake/ninja native linking, not TypeScript, Metro, JSX, or Java/Kotlin app code.
+- The failing symbols are Android C++ runtime / libc++ / C++ ABI symbols, for example:
+  - std::__ndk1::basic_string...::~basic_string()
+  - operator new(unsigned long)
+  - operator delete(void*)
+  - __cxa_guard_acquire / __cxa_throw / __gxx_personality_v0
+  - std::terminate()
+- The generated app CMake file android/app/.cxx/.../build.ninja now shows -lc++_shared in app-level LINK_FLAGS after prior mitigation, but the generated gesture-handler build file node_modules/react-native-gesture-handler/android/.cxx/.../build.ninja still shows no -lc++_shared in LINK_FLAGS or LINK_LIBRARIES.
+- The final recorded failure moved from app-level generated codegen libraries to react-native-gesture-handler's own native target:
+  - task: native CMake build under node_modules/react-native-gesture-handler/android/.cxx
+  - target: gesturehandler
+  - same missing C++ runtime symbols.
+
+Classification by requested categories:
+- Expo vs CLI mismatch: Secondary issue, not the first observed linker failure. The project is CLI but has Expo installed and autolinked. This is unnecessary and can introduce extra native modules/config, so it should be cleaned up for a CLI-only app. However, the shown failure occurs before Expo is the named failing target.
+- Dependency versions: Possible contributing issue, but not proven as the direct cause by the inspected files. Installed versions are very new and New-Architecture-capable:
+  - react-native-gesture-handler 3.0.2
+  - react-native-safe-area-context 5.8.0 installed, while package.json asks ^5.5.2
+  - react-native-screens 4.26.0
+  - react-native-svg 15.15.5
+  The native modules expose CMake/codegen under RN 0.86. No peer dependency conflict was found from package metadata: peer ranges are broad or include RN >=0.84 for screens.
+- Project configuration: Contributing issue in current state. Prior attempted CMake linker flags were added to android/app/build.gradle and android/build.gradle. The app-level flag affects android/app/.cxx, but it does not affect react-native-gesture-handler's separate native CMake build. Therefore the current Gradle mitigation is incomplete and not sufficient.
+- React Native New Architecture: Primary trigger. RN 0.86 enables New Architecture by default and forces these native CMake/codegen builds. That is the path producing the failures.
+
+3. Smallest set of changes required to make the app build and run
+-----------------------------------------------------------------
+Recommended smallest path for this project as a CLI-only app:
+
+1. Remove Expo from the CLI project unless Expo Modules are intentionally required.
+   - Remove expo from package.json.
+   - Regenerate package-lock.json with npm install.
+   - This removes ExpoModulesPackage from React Native autolinking and avoids a CLI/Expo hybrid surface that this app is not using.
+   - Evidence: no app source import of Expo APIs was found; expo is only top-level package metadata/autolinking noise.
+
+2. Keep React Native CLI architecture; do not convert to Expo.
+   - The native project is already CLI-shaped and Android Studio friendly.
+   - Converting to Expo would be larger than necessary and would not directly address the current native linker failure in the CLI Gradle build.
+
+3. Fix the New Architecture C++ runtime link for native modules.
+   Current state already attempts to add:
+   - -DANDROID_STL=c++_shared
+   - -DCMAKE_SHARED_LINKER_FLAGS=-lc++_shared
+   at the app level.
+   The generated app build.ninja confirms this reaches android/app/.cxx.
+
+   The remaining failing module is react-native-gesture-handler. Its own generated build.ninja still lacks -lc++_shared. The smallest targeted fix is to make the gesture-handler Android CMake configuration receive the same linker flag, preferably persistently via one of these approaches:
+   - Use a package version of react-native-gesture-handler that correctly links the Android C++ runtime with RN 0.86 on Windows, if available/confirmed.
+   - Or add a persistent patch-package patch for node_modules/react-native-gesture-handler/android/build.gradle to include "-DCMAKE_SHARED_LINKER_FLAGS=-lc++_shared" in its externalNativeBuild.cmake.arguments block.
+
+   Based on the actual generated files, a root subprojects block in android/build.gradle did not propagate into gesture-handler's separate CMake build, so that root-level patch alone is not enough.
+
+4. After applying the above, clear generated native build outputs and rebuild.
+   - Clear generated Android/CMake outputs, not source:
+     - android/app/.cxx
+     - android/app/build
+     - node_modules/react-native-gesture-handler/android/.cxx
+     - node_modules/react-native-gesture-handler/android/build
+   - Then run:
+     - cd android
+     - .\gradlew.bat assembleDebug
+
+5. If the gesture-handler patch reveals the same C++ runtime issue in another native module, apply the same linker fix to that module's own android/build.gradle/CMake config, or pin that module to a version whose RN 0.86 New Architecture Android build includes the runtime link correctly.
+   - Do not keep broad, ineffective Gradle hacks if they do not affect the failing module build.
+   - Prefer version pinning or a documented patch-package patch per affected module.
+
+What is not required for the smallest fix:
+------------------------------------------
+- Rewriting app UI or navigation code: TypeScript and Jest were previously green, and the failure is native linking.
+- Adding backend/API/auth/database logic: unrelated and outside project scope.
+- Converting to Expo: the project is already a CLI native app; Expo is the mismatch here, not the solution.
+- Disabling New Architecture via newArchEnabled=false: RN 0.86 reported that this is no longer supported since RN 0.82, so it is not a reliable fix.
+
+Current audit answer in one line
+--------------------------------
+This is a React Native CLI app with an unnecessary Expo dependency; the Android build failure is primarily caused by RN 0.86 New Architecture native CMake/linking for autolinked modules, currently failing because the Android C++ runtime is not linked into react-native-gesture-handler's native target. The smallest build path is to remove unused Expo, keep CLI, and add/pin a proper C++ runtime linker fix for the affected native module(s), starting with react-native-gesture-handler, then clean generated native outputs and rerun assembleDebug.
