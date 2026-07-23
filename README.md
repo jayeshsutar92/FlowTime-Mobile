@@ -1,97 +1,131 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# FlowTime — Deep Focus Timer for Android
 
-# Getting Started
+FlowTime is a premium productivity app built for deep focus. It combines adaptive timers, curated soundscapes, and session analytics to help you enter and sustain flow states.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+**Built with React Native CLI** • Android-first • Hermes engine • New Architecture
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Features
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+| Feature | Description |
+|---|---|
+| **Adaptive Timer** | Pomodoro-style work/break cycles with customizable durations |
+| **Presets** | Deep Work, Admin Tasks, Light Reading, Quick Sprint — or create your own |
+| **Soundscapes** | Binaural beats, ambient noise, and nature sounds with a built-in player |
+| **Dashboard** | Session history, streak tracking, and daily insights |
+| **Onboarding Flow** | Goal selection → Rhythm configuration → Personalized setup |
+| **Dark Theme** | AMOLED-optimized dark UI with the FlowTime design system |
 
-```sh
-# Using npm
-npm start
+## Screens
 
-# OR using Yarn
-yarn start
+- **Landing** — Hero with CTAs (Start Free / Watch Demo)
+- **Login** — Email + password with OTP fallback
+- **Onboarding** — Goal selection, rhythm configuration (4-step flow)
+- **Timer Home** — Default Timer and Custom Timer cards
+- **Active Session** — Live countdown with ambient player
+- **Custom Timer** — Configure work/break durations and session count
+- **Presets** — Saved timer configurations with play/edit controls
+- **Sounds** — Audio library with search, playlists, and favorites
+- **Now Playing** — Full-screen player with progress, controls, and volume
+- **Dashboard** — Focus stats, session timeline, daily insights
+- **Profile** — Account settings, preferences, security
+- **Preferences** — Auto-DND, strict mode, AMOLED mode, notifications
+
+## Tech Stack
+
+- **React Native** 0.86 (CLI, not Expo)
+- **TypeScript** 5.8
+- **React Navigation** 7 (Native Stack + Bottom Tabs)
+- **Hermes** JS engine
+- **lucide-react-native** for icons
+- **react-native-safe-area-context** for SafeArea
+- **react-native-screens** for native screen management
+- **react-native-gesture-handler** for gestures
+- **react-native-svg** for vector graphics
+
+## Project Structure
+
+```
+Frontend-App/
+├── android/              # Native Android project
+├── src/
+│   ├── assets/images/    # PNG assets (backgrounds, avatars, album art)
+│   ├── components/       # Reusable UI components
+│   │   ├── BrandHeader   # App header with logo + settings
+│   │   ├── Card          # Surface card with border
+│   │   ├── FlowMark      # Logo icon
+│   │   ├── IconButton    # Circular icon button
+│   │   ├── MiniPlayer    # Compact audio player bar
+│   │   ├── PrimaryButton # CTA button with icon
+│   │   ├── Primitives    # MonoLabel, SliderMock, ToggleMock
+│   │   └── Screen        # SafeArea scroll wrapper
+│   ├── data/content.ts   # Static data (presets, tracks, goals, settings)
+│   ├── navigation/       # RootNavigator (stack + tabs)
+│   ├── screens/          # All app screens
+│   └── theme/            # Design tokens (colors, typography, spacing)
+├── App.tsx               # Root component with NavigationContainer
+├── index.js              # AppRegistry entry point
+├── app.json              # App name: "FlowTime"
+├── metro.config.js       # Metro bundler config
+├── babel.config.js       # Babel with @react-native/babel-preset
+└── tsconfig.json         # TypeScript config
 ```
 
-## Step 2: Build and run your app
+## Getting Started
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Prerequisites
 
-### Android
+- Node.js ≥ 22.11
+- Android SDK (API 36, Build Tools 36.0.0, NDK 27.1)
+- Java 17+
+- Android emulator or physical device
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+### Install & Run
 
 ```sh
-bundle install
+cd Frontend-App
+
+# Install dependencies
+npm install
+
+# Start Metro bundler
+npx react-native start
+
+# Build and launch on Android (in a separate terminal)
+npx react-native run-android
 ```
 
-Then, and every time you update your native dependencies, run:
+### Build APK
 
 ```sh
-bundle exec pod install
+cd Frontend-App/android
+./gradlew assembleDebug
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+The debug APK will be at `android/app/build/outputs/apk/debug/app-debug.apk`.
 
-```sh
-# Using npm
-npm run ios
+## Design System
 
-# OR using Yarn
-yarn ios
-```
+| Token | Value |
+|---|---|
+| Background | `#071122` |
+| Surface | `#111a2d` |
+| Accent | `#a9c3ff` |
+| Accent Strong | `#4f8fff` |
+| Text | `#dce5ff` |
+| Muted | `#b9c0d3` |
+| Border | `#202b43` |
+| Font Sans | `sans-serif-medium` (Android) |
+| Font Mono | `monospace` (Android) |
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Notes
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+- This is a **React Native CLI** project — do not use `npx expo start`.
+- `expo` must not be in `package.json` dependencies (it gets auto-linked into Gradle and breaks the build).
+- On Windows, limit `reactNativeArchitectures` in `gradle.properties` to avoid 260-char path limits with CMake.
+- The app registers as `"FlowTime"` in `app.json` — `index.js` passes this to `AppRegistry.registerComponent`.
 
-## Step 3: Modify your app
+## License
 
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Private — All rights reserved.
