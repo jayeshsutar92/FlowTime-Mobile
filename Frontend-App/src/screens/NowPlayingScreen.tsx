@@ -1,12 +1,9 @@
-﻿import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Heart, Maximize2, MoreVertical, Pause, Repeat2, Rewind, SkipForward, Speaker, StepBack, StepForward } from 'lucide-react-native';
-import { Screen } from '../components/Screen';
-import { BrandHeader } from '../components/BrandHeader';
+import { ArrowLeft, Heart, MoreVertical, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume2 } from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../components/Card';
-import { IconButton } from '../components/IconButton';
-import { SliderMock } from '../components/Primitives';
 import { colors } from '../theme/colors';
 import { font } from '../theme/typography';
 import { images } from '../data/content';
@@ -15,32 +12,290 @@ import { RootStackParamList } from '../types/navigation';
 type Props = NativeStackScreenProps<RootStackParamList, 'NowPlaying'>;
 
 export default function NowPlayingScreen({ navigation }: Props) {
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isFav, setIsFav] = useState(false);
+  const { width } = useWindowDimensions();
+
+  const scale = Math.min(1.1, Math.max(0.85, width / 390));
+  const fs = (base: number) => Math.round(base * scale);
+  const sp = (base: number) => Math.round(base * scale);
+
+  // Responsive artwork size: 68% of screen width (min 200, max 260)
+  const artworkSize = Math.min(260, Math.max(200, Math.round(width * 0.68)));
+
   return (
-    <Screen>
-      <BrandHeader title="Now Playing" back onBack={() => navigation.goBack()} rightIcon={MoreVertical} />
-      <View style={styles.content}>
-        <Image source={images.albumFocus} style={styles.album} />
-        <Text style={styles.title}>Focus Engine 432Hz</Text>
-        <Text style={styles.meta}>BINAURAL BEATS • DEEP FLOW</Text>
-        <View style={styles.progress}><SliderMock value={0.45} labels={['12:45','-15:15']} /></View>
-        <View style={styles.controls}><IconButton icon={Maximize2} size={44} /><IconButton icon={StepBack} size={48} /><View style={styles.pause}><Pause size={66} color={colors.accentDark} fill={colors.accentDark} /></View><IconButton icon={SkipForward} size={48} /><IconButton icon={Repeat2} size={44} /></View>
-        <Card style={styles.panel}><Heart size={42} color={colors.text} /><Text style={styles.favorite}>Favorite</Text><Speaker size={36} color={colors.text} /><View style={styles.volume}><View style={styles.volumeFill} /><View style={styles.volumeKnob} /></View><Rewind size={34} color={colors.text} /></Card>
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
+      {/* Header Bar */}
+      <View style={styles.topBar}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]}
+          hitSlop={8}
+        >
+          <ArrowLeft size={22} color={colors.text} />
+        </Pressable>
+        <Text style={[styles.headerTitle, { fontSize: fs(17) }]}>Now Playing</Text>
+        <Pressable
+          style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]}
+          hitSlop={8}
+        >
+          <MoreVertical size={20} color={colors.text} />
+        </Pressable>
       </View>
-    </Screen>
+
+      {/* Main Content Layout */}
+      <View style={[styles.content, { paddingHorizontal: sp(24) }]}>
+        {/* Artwork */}
+        <View style={styles.artworkWrap}>
+          <Image
+            source={images.albumFocus}
+            style={[
+              styles.artwork,
+              { width: artworkSize, height: artworkSize, borderRadius: sp(20) },
+            ]}
+          />
+        </View>
+
+        {/* Track Title & Subtitle */}
+        <View style={styles.trackInfo}>
+          <Text style={[styles.trackTitle, { fontSize: fs(22) }]} numberOfLines={1}>
+            Focus Engine 432Hz
+          </Text>
+          <Text style={[styles.trackMeta, { fontSize: fs(11) }]} numberOfLines={1}>
+            BINAURAL BEATS • DEEP FLOW
+          </Text>
+        </View>
+
+        {/* Seek Bar */}
+        <View style={styles.seekBlock}>
+          <View style={styles.seekTrack}>
+            <View style={[styles.seekFill, { width: '45%' }]} />
+            <View style={[styles.seekThumb, { left: '45%' }]} />
+          </View>
+          <View style={styles.timeRow}>
+            <Text style={[styles.timeText, { fontSize: fs(11) }]}>12:45</Text>
+            <Text style={[styles.timeText, { fontSize: fs(11) }]}>-15:15</Text>
+          </View>
+        </View>
+
+        {/* Playback Controls */}
+        <View style={styles.controlsRow}>
+          <Pressable hitSlop={8} style={({ pressed }) => [styles.ctrlBtn, pressed && styles.pressed]}>
+            <Shuffle size={fs(18)} color={colors.dim} />
+          </Pressable>
+
+          <Pressable hitSlop={8} style={({ pressed }) => [styles.ctrlBtn, pressed && styles.pressed]}>
+            <SkipBack size={fs(24)} color={colors.text} />
+          </Pressable>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.playBtn,
+              { width: sp(64), height: sp(64), borderRadius: sp(32) },
+              pressed && styles.pressed,
+            ]}
+            onPress={() => setIsPlaying(!isPlaying)}
+          >
+            {isPlaying ? (
+              <Pause size={fs(26)} color={colors.accentDark} fill={colors.accentDark} />
+            ) : (
+              <Play size={fs(26)} color={colors.accentDark} fill={colors.accentDark} style={{ marginLeft: 2 }} />
+            )}
+          </Pressable>
+
+          <Pressable hitSlop={8} style={({ pressed }) => [styles.ctrlBtn, pressed && styles.pressed]}>
+            <SkipForward size={fs(24)} color={colors.text} />
+          </Pressable>
+
+          <Pressable hitSlop={8} style={({ pressed }) => [styles.ctrlBtn, pressed && styles.pressed]}>
+            <Repeat size={fs(18)} color={colors.dim} />
+          </Pressable>
+        </View>
+
+        {/* Favorite & Volume Bar */}
+        <Card style={styles.bottomBar}>
+          <Pressable
+            onPress={() => setIsFav(!isFav)}
+            style={styles.favBtn}
+            hitSlop={8}
+          >
+            <Heart
+              size={fs(18)}
+              color={isFav ? colors.danger : colors.muted}
+              fill={isFav ? colors.danger : 'transparent'}
+            />
+            <Text style={[styles.favText, { fontSize: fs(12) }, isFav && { color: colors.danger }]}>
+              Favorite
+            </Text>
+          </Pressable>
+
+          <View style={styles.volWrap}>
+            <Volume2 size={fs(16)} color={colors.muted} />
+            <View style={styles.volTrack}>
+              <View style={[styles.volFill, { width: '65%' }]} />
+              <View style={[styles.volKnob, { left: '65%' }]} />
+            </View>
+          </View>
+        </Card>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 48, alignItems: 'center' },
-  album: { width: '100%', aspectRatio: 1, borderRadius: 20, borderWidth: 1, borderColor: colors.borderStrong, marginTop: 72 },
-  title: { color: colors.text, fontSize: 44, fontFamily: font.sansBold, fontWeight: '900', marginTop: 76, textAlign: 'center' },
-  meta: { color: colors.accent, fontFamily: font.mono, fontSize: 20, letterSpacing: 4, marginTop: 22 },
-  progress: { alignSelf: 'stretch', marginTop: 70 },
-  controls: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 52 },
-  pause: { width: 160, height: 160, borderRadius: 80, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center', shadowColor: colors.accent, shadowOpacity: 0.25, shadowRadius: 24, elevation: 10 },
-  panel: { alignSelf: 'stretch', marginTop: 72, minHeight: 112, paddingHorizontal: 40, flexDirection: 'row', alignItems: 'center', gap: 24 },
-  favorite: { color: colors.text, fontFamily: font.mono, fontSize: 21, letterSpacing: 2, flex: 1 },
-  volume: { width: 190, height: 8, borderRadius: 8, backgroundColor: colors.surfaceSoft },
-  volumeFill: { width: '68%', height: 8, borderRadius: 8, backgroundColor: colors.borderStrong },
-  volumeKnob: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.accent, marginTop: -16, marginLeft: '62%' },
+  safe: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.surfaceSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    color: colors.text,
+    fontFamily: font.sansBold,
+    fontWeight: '800',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  artworkWrap: {
+    shadowColor: colors.accent,
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  artwork: {
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+  },
+  trackInfo: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  trackTitle: {
+    color: colors.text,
+    fontFamily: font.sansBold,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  trackMeta: {
+    color: colors.accent,
+    fontFamily: font.mono,
+    letterSpacing: 2.5,
+    textAlign: 'center',
+  },
+  seekBlock: {
+    width: '100%',
+    gap: 6,
+  },
+  seekTrack: {
+    height: 18,
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  seekFill: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.accent,
+  },
+  seekThumb: {
+    position: 'absolute',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.accent,
+    marginLeft: -7,
+    elevation: 3,
+  },
+  timeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  timeText: {
+    color: colors.dim,
+    fontFamily: font.mono,
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 8,
+  },
+  ctrlBtn: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  playBtn: {
+    backgroundColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: colors.accent,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+  },
+  bottomBar: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  favBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  favText: {
+    color: colors.muted,
+    fontFamily: font.sansBold,
+  },
+  volWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 0.8,
+  },
+  volTrack: {
+    flex: 1,
+    height: 14,
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  volFill: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.borderStrong,
+  },
+  volKnob: {
+    position: 'absolute',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.accent,
+    marginLeft: -6,
+  },
+  pressed: {
+    opacity: 0.8,
+  },
 });
