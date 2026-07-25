@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   ImageBackground,
+  Pressable,
   StyleSheet,
   Text,
   View,
   useWindowDimensions,
-  Pressable,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ArrowRight, Sparkles } from 'lucide-react-native';
@@ -20,7 +20,7 @@ import { RootStackParamList } from '../types/navigation';
 type Props = NativeStackScreenProps<RootStackParamList, 'Landing'>;
 
 export default function LandingScreen({ navigation }: Props) {
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   // Clamp scale: never below 0.8 (tiny device) or above 1.15 (large tablet)
   const scale = Math.min(1.15, Math.max(0.8, width / 390));
 
@@ -28,7 +28,6 @@ export default function LandingScreen({ navigation }: Props) {
     <ImageBackground source={images.landingBg} style={styles.bg} resizeMode="cover">
       <View style={styles.overlay} />
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
-
         {/* Nav row */}
         <View style={styles.nav}>
           <View style={styles.brand}>
@@ -42,7 +41,9 @@ export default function LandingScreen({ navigation }: Props) {
           {/* Badge */}
           <View style={styles.badge}>
             <Sparkles size={14} color={colors.accent} />
-            <Text style={[styles.badgeText, { fontSize: Math.round(11 * scale) }]}>NOW IN EARLY ACCESS</Text>
+            <Text style={[styles.badgeText, { fontSize: Math.round(11 * scale) }]}>
+              NOW IN EARLY ACCESS
+            </Text>
           </View>
 
           {/* Headline */}
@@ -64,11 +65,17 @@ export default function LandingScreen({ navigation }: Props) {
           />
 
           {/* Secondary CTA */}
-          <Pressable style={styles.secondaryBtn}>
-            <Text style={[styles.secondaryText, { fontSize: Math.round(16 * scale) }]}>Watch Demo</Text>
+          <Pressable
+            onPress={() => navigation.navigate('Login')}
+            accessibilityRole="button"
+            accessibilityLabel="Watch Demo"
+            style={({ pressed }) => [styles.secondaryBtn, pressed && styles.pressed]}
+          >
+            <Text style={[styles.secondaryText, { fontSize: Math.round(16 * scale) }]}>
+              Watch Demo
+            </Text>
           </Pressable>
         </View>
-
       </SafeAreaView>
     </ImageBackground>
   );
@@ -127,4 +134,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceSoft,
   },
   secondaryText: { color: colors.text, fontFamily: font.sansBold, fontWeight: '700' },
+  pressed: { opacity: 0.8 },
 });

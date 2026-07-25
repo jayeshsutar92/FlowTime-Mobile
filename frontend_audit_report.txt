@@ -1,0 +1,144 @@
+================================================================================
+FLOWTIME REACT NATIVE FRONTEND AUDIT REPORT
+================================================================================
+Date: 2026-07-25
+Scope: Frontend-App/ directory (React Native Android Application)
+Auditor: Antigravity AI Coding Assistant
+
+--------------------------------------------------------------------------------
+1. OVERALL FRONTEND COMPLETENESS
+--------------------------------------------------------------------------------
+Completeness Score: 65.0%
+
+Justification:
+- 15 UI screens implemented and responsive for core focus timer, player, dashboard, and settings features.
+- Missing critical authentication screens (Signup, Forgot Password, Reset Password, OTP Verification).
+- Zero state management layer (no Context, Redux, Zustand, or API client layer).
+- Uncontrolled form inputs with missing validation, error feedback, and loading/empty UI states.
+- Multiple dead interactive buttons, icons, and placeholder navigation paths.
+
+
+--------------------------------------------------------------------------------
+2. CRITICAL ISSUES
+--------------------------------------------------------------------------------
+1. Missing Authentication Screens & Flow:
+   - The app completely lacks SignupScreen, ForgotPasswordScreen, ResetPasswordScreen, and OTPVerificationScreen.
+2. Direct Authentication Bypass:
+   - LoginScreen directly executes navigation.navigate('OnboardingGoal') upon clicking "Sign In" without input validation, credentials check, or authentication state.
+3. Absence of State Management & Network Client:
+   - Zero state persistence or API client (axios/fetch) to manage JWT tokens, user session state, active timer progress, or audio playback state.
+4. Placeholder Content in Secondary Views:
+   - SettingsDetailScreen is a hardcoded static text box ("This frontend-only screen preserves the referenced navigation path without implementing logic").
+
+
+--------------------------------------------------------------------------------
+3. HIGH-PRIORITY ISSUES
+--------------------------------------------------------------------------------
+1. Dead Interactive Controls:
+   - LandingScreen.tsx: "Watch Demo" button has no onPress handler.
+   - LoginScreen.tsx: "Forgot?", "Login with OTP instead", "Sign up", and EyeOff password visibility toggle have no handlers or state.
+   - PresetsScreen.tsx: "MoreVertical" menu dots and "CREATE NEW PRESET" card are non-functional.
+   - SoundsScreen.tsx: Search TextInput is uncontrolled with no filter logic; "VIEW ALL" button and "MoreVertical" track dots are dead.
+   - NowPlayingScreen.tsx: Shuffle, Repeat, and Rewind buttons are visual-only mocks.
+   - DailyInsightsScreen.tsx: Timeframe segment picker ('Day', 'Week', 'Month', 'Year') lacks active selection state.
+   - ProfileScreen.tsx: Avatar Edit3 badge and Logout button lack handlers or confirmation dialogs.
+
+2. Uncontrolled Form Inputs & Missing Validation:
+   - LoginScreen text inputs lack value state, onChangeText bindings, and validation error messages for empty or invalid email/password formats.
+
+3. Unscaled Layout Spacing in Legacy Views:
+   - DailyInsightsScreen.tsx uses unscaled legacy pixel units (fontSize: 72, padding: 50, minHeight: 315) which may cause vertical clipping on 360dp devices compared to refactored screens.
+
+
+--------------------------------------------------------------------------------
+4. MEDIUM ISSUES
+--------------------------------------------------------------------------------
+1. Missing UI Feedback States:
+   - No ActivityIndicator loading spinners for async actions.
+   - No empty list placeholders (e.g. empty favorites, empty presets, zero search results).
+   - No error banner components for network timeouts or API failure responses.
+
+2. Missing Account Management & Profile Editing:
+   - No profile update modal/screen (avatar change, display name update).
+   - No self-service account deletion trigger required by Google Play & Apple App Store guidelines.
+
+3. Static Mock Data Dependencies:
+   - All statistics, presets, tracks, heatmaps, and timeline items are statically imported from data/content.ts with no refresh mechanism.
+
+
+--------------------------------------------------------------------------------
+5. LOW-PRIORITY POLISH
+--------------------------------------------------------------------------------
+1. Accessibility (a11y) Gaps:
+   - Custom Pressable cards and icon buttons across screens lack accessibilityLabel, accessibilityHint, and accessible properties.
+
+2. Keyboard Avoidance Handling:
+   - LoginScreen uses SafeAreaView without KeyboardAvoidingView, potentially causing soft keyboard overlap on small Android screens during text input.
+
+3. Component & Typography Token Inconsistencies:
+   - Legacy primitives (Primitives.tsx) use static 18sp font sizes, whereas refactored screens utilize clamped scale factor helpers (fs(), sp()).
+
+
+--------------------------------------------------------------------------------
+6. MISSING SCREENS & FEATURES
+--------------------------------------------------------------------------------
+1. SignupScreen — User registration with email/username & password.
+2. ForgotPasswordScreen — Identifier submission for password reset.
+3. ResetPasswordScreen — New password entry with OTP validation.
+4. OTPVerificationScreen — 6-digit OTP code entry view.
+5. EditProfileModal / Screen — User avatar, display name, and email update.
+6. CreatePresetModal / Screen — Form to define and save custom focus rhythms.
+7. AccountDeletionModal — Self-service account deletion confirmation.
+
+
+--------------------------------------------------------------------------------
+7. BROKEN NAVIGATION PATHS
+--------------------------------------------------------------------------------
+1. LoginScreen -> "Forgot?" (No target screen/route).
+2. LoginScreen -> "Sign up" (No target screen/route).
+3. LoginScreen -> "Login with OTP instead" (No target screen/route).
+4. PresetsScreen -> "CREATE NEW PRESET" (No target screen/route).
+5. ProfileScreen -> "Logout" (No state clear or navigation action).
+6. SettingsDetailScreen (Renders placeholder text for all setting sub-items).
+
+
+--------------------------------------------------------------------------------
+8. UI/UX INCONSISTENCIES
+--------------------------------------------------------------------------------
+1. Refactored Screens (Login, OnboardingGoal, OnboardingRhythm, TimerHome, CustomTimer, ActiveSession, Presets, Sounds, NowPlaying, Dashboard, Profile, Preferences, MainTabs):
+   - Fully responsive using clamped scale (width / 390) and Flexbox layout.
+
+2. Unrefactored Screen (DailyInsightsScreen) & Shared Primitives (Primitives.tsx):
+   - Use large unscaled hardcoded values (fontSize: 72, padding: 50, height: 92), creating visual density mismatch.
+
+
+--------------------------------------------------------------------------------
+9. SUGGESTED IMPLEMENTATION ORDER
+--------------------------------------------------------------------------------
+Phase 1: Auth & Navigation Completion
+1. Build missing authentication screens (SignupScreen, ForgotPasswordScreen, ResetPasswordScreen, OTPVerificationScreen).
+2. Add missing routes to RootStackParamList and RootNavigator.
+3. Wire up dead navigation buttons (Forgot, Sign Up, Create Preset, Logout).
+
+Phase 2: State Management & API Integration
+4. Implement Auth Context & Token Storage (AsyncStorage for JWT tokens).
+5. Build API service layer (axios client with auth header interceptors).
+6. Connect Auth screens to Django endpoints (/api/login/, /api/signup/, /api/me/).
+7. Connect Focus Session & Timer screens to backend (/api/start-session/, /api/pause-session/, /api/end-session/).
+8. Connect Presets, Sounds, and Player screens to backend (/api/presets/, /api/music/tracks/, /api/music/queue/).
+9. Connect Dashboard & Daily Insights to backend (/api/stats/, /api/heatmap/, /api/insights/).
+
+Phase 3: Error Handling & Polish
+10. Add Loading, Empty, and Error UI states across all screens.
+11. Refactor DailyInsightsScreen and Primitives.tsx for consistent scaled typography.
+12. Add KeyboardAvoidingView to LoginScreen and form inputs.
+
+
+--------------------------------------------------------------------------------
+10. FINAL VERDICT ON READINESS FOR BACKEND INTEGRATION
+--------------------------------------------------------------------------------
+Status: NOT READY YET (65.0% Complete).
+
+Summary:
+While the primary user interface screens are visually well-designed and responsive on Android, the frontend lacks essential authentication screens, form state management, network/API client services, and error handling states required to successfully connect with the Django backend. Completing Phase 1 (Auth screens & state layer) is recommended before starting backend API wiring.
+================================================================================

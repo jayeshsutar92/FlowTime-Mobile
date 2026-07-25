@@ -1,0 +1,208 @@
+================================================================================
+FLOWTIME BACKEND READINESS AUDIT REPORT (REACT NATIVE MOBILE FRONTEND)
+================================================================================
+Date: 2026-07-24
+Scope: backend/ directory (Django REST Framework API)
+Target Client: React Native Android Application (Frontend-App/)
+
+--------------------------------------------------------------------------------
+1. BACKEND READINESS PERCENTAGE
+--------------------------------------------------------------------------------
+Exact Score: 76.4%
+
+Justification:
+- Core domain features for Timer Sessions, Presets, Music Library, Analytics, and JWT Authentication are fully implemented and functional.
+- Missing essential mobile endpoints: User Profile (/api/me/), App Preferences (/api/preferences/), Onboarding Goals, and Self Account Deletion.
+- Infrastructure and mobile compatibility gaps: Console email backend for OTP, Redis cache dependency for playback queue without DB fallback, CORS restricted to web origins, and hardcoded development SECRET_KEY fallback in settings.py.
+
+
+--------------------------------------------------------------------------------
+2. API INVENTORY
+--------------------------------------------------------------------------------
+Implemented Endpoints (44 Total):
+
+Authentication & Account Management:
+1. GET /api/csrf/ — Sets and returns CSRF cookie (csrf_cookie). Auth: Unauthenticated.
+2. POST /api/signup/ — Registers new user with identifier (email/username) and password (signup). Auth: Unauthenticated.
+3. POST /api/login/ — Authenticates user via password or OTP, returns JWT tokens (login_user). Auth: Unauthenticated (Throttled: 5/min).
+4. POST /api/logout/ — Blacklists JWT refresh token (logout_user). Auth: Authenticated (IsAuthenticated).
+5. POST /api/token/refresh/ — Refreshes JWT access token (custom_token_refresh). Auth: Unauthenticated (valid refresh token).
+6. POST /api/forgot-password/ — Generates and emails 6-digit OTP for password reset (forgot_password). Auth: Unauthenticated (Throttled: 3/min).
+7. POST /api/reset-password/ — Resets password using valid OTP (reset_password). Auth: Unauthenticated (Throttled: 3/min).
+
+Focus Session Engine:
+8. POST /api/start-session/ — Initiates focus session and calculates adaptive breaks (start_session). Auth: Authenticated.
+9. POST /api/pause-session/ — Pauses running focus session (pause_session). Auth: Authenticated.
+10. POST /api/resume-session/ — Resumes paused focus session (resume_session). Auth: Authenticated.
+11. POST /api/end-session/ — Completes focus session (end_session). Auth: Authenticated.
+12. GET /api/sessions/ — Returns list of all user sessions (get_sessions). Auth: Authenticated.
+
+Analytics & Insights:
+13. GET /api/stats/ — Aggregates focus time, total sessions, and average duration (get_stats). Auth: Authenticated.
+14. GET /api/insights/ — Returns completion rate, peak focus hour, and recommendations (get_insights). Auth: Authenticated.
+15. GET /api/productivity-score/ — Calculates productivity score (0-100) and level (get_productivity_score). Auth: Authenticated.
+16. GET /api/heatmap/ — Returns 7-day focus session count activity array (get_heatmap). Auth: Authenticated.
+
+Presets Management:
+17. POST /api/save-preset/ — Creates timer preset (save_preset). Auth: Authenticated.
+18. GET /api/presets/ — Lists user timer presets (presets_collection GET). Auth: Authenticated.
+19. POST /api/presets/ — Creates user timer preset (presets_collection POST). Auth: Authenticated.
+20. DELETE /api/presets/<int:id>/ — Deletes timer preset by ID (delete_preset_by_id). Auth: Authenticated.
+21. DELETE /api/delete-preset/<int:id>/ — Duplicate legacy endpoint for deleting preset (delete_preset). Auth: Authenticated.
+
+Music & Audio Library:
+22. POST /api/music/upload/ — Uploads audio file(s) (MP3, WAV, AAC, etc., max 20MB) (upload_music). Auth: Authenticated.
+23. GET /api/music/tracks/ — Lists user music tracks (list_music_tracks). Auth: Authenticated.
+24. GET /api/music/playlists/ — Lists user playlists (playlists_collection GET). Auth: Authenticated.
+25. POST /api/music/playlists/ — Creates playlist with ordered tracks (playlists_collection POST). Auth: Authenticated.
+26. GET /api/music/playlists/<int:id>/ — Fetches playlist details (playlist_detail GET). Auth: Authenticated.
+27. PUT /api/music/playlists/<int:id>/ — Updates playlist name & track order (playlist_detail PUT). Auth: Authenticated.
+28. DELETE /api/music/playlists/<int:id>/ — Deletes playlist (playlist_detail DELETE). Auth: Authenticated.
+29. GET /api/music/favorites/ — Fetches user favorite tracks (favorites_collection). Auth: Authenticated.
+30. POST /api/music/favorites/add/ — Adds track to favorites (add_favorite). Auth: Authenticated.
+31. POST /api/music/favorites/remove/ — Removes track from favorites (remove_favorite). Auth: Authenticated.
+
+Playback Queue & State (Redis Cache):
+32. GET /api/music/queue/ — Fetches active music playback queue (get_queue). Auth: Authenticated.
+33. POST /api/music/queue/add/ — Appends track or playlist to queue (add_to_queue). Auth: Authenticated.
+34. POST /api/music/queue/remove/ — Removes track from queue by position (remove_from_queue). Auth: Authenticated.
+35. POST /api/music/queue/reorder/ — Reorders track positions in queue (reorder_queue). Auth: Authenticated.
+36. POST /api/music/queue/next/ — Advances queue to next track (play_next). Auth: Authenticated.
+37. POST /api/music/queue/previous/ — Rewinds queue to previous track (play_previous). Auth: Authenticated.
+38. POST /api/music/queue/shuffle/ — Toggles queue shuffle mode (toggle_shuffle). Auth: Authenticated.
+39. POST /api/music/queue/repeat/ — Sets repeat mode ('off', 'track', 'queue') (set_repeat). Auth: Authenticated.
+40. GET /api/music/queue/state/ — Gets current playback state & active track (playback_state GET). Auth: Authenticated.
+41. POST /api/music/queue/state/ — Updates playback state (playback_state POST). Auth: Authenticated.
+
+Admin Management:
+42. GET /api/admin/users/ — Lists all registered users (admin_list_users). Auth: Staff Only.
+43. GET /api/admin/users/count/ — Returns total user count (admin_user_count). Auth: Staff Only.
+44. DELETE /api/admin/users/<int:user_id>/ — Deletes specific user account (admin_delete_user). Auth: Staff Only.
+
+
+--------------------------------------------------------------------------------
+3. MISSING APIS
+--------------------------------------------------------------------------------
+1. User Profile API (GET /api/me/, PUT /api/me/):
+   - Needed by ProfileScreen.tsx to fetch and update user avatar, username, email, display name, and rank title. Currently, the screen displays hardcoded mock data ("Alex Rivera").
+
+2. App Preferences API (GET /api/preferences/, PUT /api/preferences/):
+   - Needed by PreferencesScreen.tsx to persist user toggles (Auto-DND, Lock Screen Focus, Strict Mode, Amoled Black Mode, High Contrast Mode, Session Reminders, Break Alerts).
+
+3. Onboarding Selections API (POST /api/onboarding/goal/, POST /api/onboarding/rhythm/):
+   - Needed by OnboardingGoalScreen.tsx and OnboardingRhythmScreen.tsx to store user-chosen productivity goals and rhythm defaults upon onboarding completion.
+
+4. Self Account Deletion API (DELETE /api/me/):
+   - Mandatory requirement under Google Play Store & Apple App Store developer policies allowing users to delete their own account. Currently, only staff admin_delete_user exists.
+
+5. Push Notification Registration API (POST /api/notifications/register/):
+   - Needed to register FCM/device tokens for background session alerts and break completion notifications on Android.
+
+
+--------------------------------------------------------------------------------
+4. BROKEN OR FAILING APIS
+--------------------------------------------------------------------------------
+1. Forgot Password & OTP Delivery on Production:
+   - forgot_password uses send_mail() configured with "django.core.mail.backends.console.EmailBackend". In production, OTP codes are logged to standard output, not delivered via SMTP/SMS. OTP login and reset will fail for real users.
+
+2. Music File Upload & Storage Persistence:
+   - upload_music saves files to local disk MEDIA_ROOT. On ephemeral or serverless containers (e.g. Render, Heroku), uploaded audio files disappear on container restart unless backed by S3/Cloud Storage.
+
+3. Analytics Cache Key Invalidations & Multi-worker Sync:
+   - get_user_cache_version uses cache.get_or_set. If Redis is absent or if LocMemCache is used across multiple Gunicorn processes, cache keys get out of sync, returning stale analytics.
+
+4. Duplicate Preset Delete Endpoints:
+   - /api/presets/<int:id>/ and /api/delete-preset/<int:id>/ map to separate functions delegating to delete_preset_record. Inconsistent API contract.
+
+
+--------------------------------------------------------------------------------
+5. ANDROID INTEGRATION RISKS
+--------------------------------------------------------------------------------
+1. JWT Authentication vs CSRF / Cookie Setup:
+   - settings.py configures CSRF_COOKIE_SAMESITE = "None" and SessionMiddleware. Native Android apps use Authorization: Bearer <access_token> header. CSRF and session cookies are unnecessary for mobile and risk header confusion.
+
+2. CORS Restrictions:
+   - CORS_ALLOWED_ORIGINS lists web origins (localhost:3000, Vercel URLs). Native Android apps do not enforce CORS, but webviews or Metro bundler requests from local network IPs (e.g. 10.0.2.2 or 192.168.x.x) will be blocked.
+
+3. Media URL Resolution on Android Emulator:
+   - MusicTrackSerializer.get_audio_url uses request.build_absolute_uri(). If the host header resolves to localhost:8000, Android emulators (which require 10.0.2.2:8000) will fail to stream audio.
+
+4. Background Timer & State Sync:
+   - Android OS suspends background Javascript timers. ActiveSessionScreen client countdowns pause when app is backgrounded. Server resume_session computes paused_seconds correctly, but start_session lacks a persistent started_at timestamp in the database model.
+
+
+--------------------------------------------------------------------------------
+6. BOTTLENECKS
+--------------------------------------------------------------------------------
+1. Database N+1 Queries in Playlists:
+   - PlaylistSerializer uses SerializerMethodField querying PlaylistTrack per playlist without prefetch_related('playlist_tracks__track'). Fetching 50 playlists triggers 51 SQL queries.
+
+2. Redis Ephemeral Queue & Playback State:
+   - Queue and playback state are stored exclusively in Redis (cache.set("music:queue:<user_id>", ...)). If Redis restarts or evicts keys under memory pressure, active user queue and playback position vanish permanently without database backup.
+
+3. SQLite Default Database Configuration:
+   - If DATABASE_URL environment variable is missing, fallback uses local SQLite (db.sqlite3). SQLite locks database files during concurrent writes from mobile clients.
+
+
+--------------------------------------------------------------------------------
+7. SECURITY REVIEW
+--------------------------------------------------------------------------------
+1. Hardcoded Secret Key Fallback:
+   - settings.py includes a hardcoded development SECRET_KEY ('django-insecure-i&$deza...'). If SECRET_KEY is omitted in production environment variables, JWT signatures become publicly predictable.
+
+2. DEBUG = True in Settings:
+   - DEBUG is hardcoded to True on line 27 of settings.py. Production failures will leak Python tracebacks, database queries, and environment details to mobile devices.
+
+3. Rate Limiting:
+   - Properly configured: Login (5/min), OTP (3/min), Anon (100/day), User (1000/day).
+
+4. Input Validation:
+   - Uses Django password validators, integer range checks, and audio file extension validation (max 20MB).
+
+
+--------------------------------------------------------------------------------
+8. PRODUCTION READINESS
+--------------------------------------------------------------------------------
+Actions required before launching the Android app:
+1. Set DEBUG = False and inject production SECRET_KEY via environment variables.
+2. Replace console.EmailBackend with real SMTP or email delivery service (SendGrid, AWS SES, Resend).
+3. Implement /api/me/ and /api/preferences/ endpoints.
+4. Ensure audio media URLs resolve to accessible host IP/domain for Android devices.
+5. Add database fallback for playback queue and player state.
+6. Configure S3 / Cloud Storage for user audio uploads.
+
+
+--------------------------------------------------------------------------------
+9. PRIORITY LIST
+--------------------------------------------------------------------------------
+Critical:
+1. Set DEBUG = False and enforce environment SECRET_KEY.
+2. Implement real email backend for OTP verification.
+3. Add /api/me/ (Profile) and /api/preferences/ (App Preferences) endpoints.
+
+High:
+1. Fix audio media URL generation for Android mobile clients (audio_url).
+2. Add database backing for music queue & playback state.
+3. Add self account deletion endpoint (DELETE /api/me/) for Play Store compliance.
+
+Medium:
+1. Fix N+1 queries in PlaylistSerializer using prefetch_related.
+2. Add composite index on Session(user, created_at).
+3. Consolidate duplicate preset deletion routes.
+
+Low:
+1. Clean up unused CSRF endpoints for mobile JWT clients.
+2. Add additional admin analytics endpoints.
+
+
+--------------------------------------------------------------------------------
+10. FINAL VERDICT
+--------------------------------------------------------------------------------
+Is the backend ready for React Native integration?
+PARTIALLY READY (76.4%). Core Timer, Preset, Music, and Analytics endpoints are solid, but missing Profile and Preferences APIs, production security hardening, and real OTP email delivery currently prevent full mobile integration.
+
+What should be implemented or fixed first?
+1. Implement /api/me/ and /api/preferences/ endpoints.
+2. Harden production settings (DEBUG=False, SECRET_KEY, SMTP email service).
+3. Resolve media file URL resolution for Android emulator/device access.
+================================================================================
