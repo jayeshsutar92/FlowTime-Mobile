@@ -88,6 +88,7 @@ export default function LoginScreen({ navigation }: Props) {
             <View style={styles.passwordLabelRow}>
               <Text style={[styles.label, { fontSize: fs(11) }]}>PASSWORD</Text>
               <Pressable
+                onPress={() => navigation.navigate('SettingsDetail', { title: 'Forgot Password' })}
                 hitSlop={8}
                 accessibilityRole="button"
                 accessibilityLabel="Forgot password"
@@ -135,6 +136,7 @@ export default function LoginScreen({ navigation }: Props) {
               title="Login with OTP instead"
               icon={KeyRound}
               variant="outline"
+              onPress={() => navigation.navigate('OnboardingGoal')}
               style={styles.otpBtn}
             />
 
@@ -142,6 +144,7 @@ export default function LoginScreen({ navigation }: Props) {
             <View style={styles.signupRow}>
               <Text style={[styles.accountText, { fontSize: fs(13) }]}>Don't have an account? </Text>
               <Pressable
+                onPress={() => navigation.navigate('SettingsDetail', { title: 'Sign Up' })}
                 hitSlop={8}
                 accessibilityRole="button"
                 accessibilityLabel="Sign up"

@@ -30,7 +30,10 @@ export default function ProfileScreen({ navigation }: Props) {
       >
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <View style={[styles.avatarWrap, { width: sp(90), height: sp(90) }]}>
+          <Pressable
+            onPress={() => navigation.navigate('SettingsDetail', { title: 'Edit Profile' })}
+            style={[styles.avatarWrap, { width: sp(90), height: sp(90) }]}
+          >
             <Image
               source={images.profileAvatar}
               style={[styles.avatar, { width: sp(90), height: sp(90), borderRadius: sp(45) }]}
@@ -38,7 +41,7 @@ export default function ProfileScreen({ navigation }: Props) {
             <View style={[styles.editBadge, { width: sp(28), height: sp(28), borderRadius: sp(14) }]}>
               <Edit3 size={fs(14)} color={colors.accentDark} />
             </View>
-          </View>
+          </Pressable>
 
           <Text style={[styles.userName, { fontSize: fs(22) }]}>Alex Rivera</Text>
 
@@ -103,7 +106,10 @@ export default function ProfileScreen({ navigation }: Props) {
         </View>
 
         {/* Logout Button */}
-        <Pressable style={({ pressed }) => [styles.logoutBtn, pressed && styles.pressed]}>
+        <Pressable
+          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Landing' as never }] })}
+          style={({ pressed }) => [styles.logoutBtn, pressed && styles.pressed]}
+        >
           <LogOut size={fs(18)} color={colors.danger} />
           <Text style={[styles.logoutText, { fontSize: fs(14) }]}>Logout</Text>
         </Pressable>

@@ -118,6 +118,7 @@ export default function CustomTimerScreen({ navigation }: Props) {
             title="Save as Preset"
             icon={Bookmark}
             variant="secondary"
+            onPress={() => navigation.navigate('SettingsDetail', { title: 'Save Preset' })}
             style={styles.secondaryBtn}
           />
         </View>
@@ -129,7 +130,11 @@ export default function CustomTimerScreen({ navigation }: Props) {
             <Text style={[styles.lastTitle, { fontSize: fs(14) }]}>Last Session</Text>
             <Text style={[styles.lastMeta, { fontSize: fs(12) }]}>25:00 • Focused Deep Work</Text>
           </View>
-          <Pressable hitSlop={8} style={styles.lastResetBtn}>
+          <Pressable
+            onPress={() => navigation.navigate('ActiveSession')}
+            hitSlop={8}
+            style={styles.lastResetBtn}
+          >
             <RotateCcw size={fs(16)} color={colors.text} />
           </Pressable>
           <Pressable

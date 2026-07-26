@@ -57,10 +57,17 @@ export default function PresetsScreen({ navigation }: Props) {
                   </Text>
                 </View>
               </View>
-              <Pressable hitSlop={8} style={styles.moreBtn}>
+              <Pressable
+                onPress={() => navigation.navigate('SettingsDetail', { title: 'Preset Options' })}
+                hitSlop={8}
+                style={styles.moreBtn}
+              >
                 <MoreVertical size={fs(18)} color={colors.dim} />
               </Pressable>
-              <Pressable style={[styles.playBtn, isActive ? styles.playActive : styles.playInactive]}>
+              <Pressable
+                onPress={() => navigation.navigate('ActiveSession')}
+                style={[styles.playBtn, isActive ? styles.playActive : styles.playInactive]}
+              >
                 <Play
                   size={fs(16)}
                   color={isActive ? colors.accentDark : colors.dim}
@@ -72,7 +79,10 @@ export default function PresetsScreen({ navigation }: Props) {
         })}
 
         {/* Create new preset */}
-        <Pressable style={styles.createCard}>
+        <Pressable
+          onPress={() => navigation.navigate('CustomTimer')}
+          style={styles.createCard}
+        >
           <Plus size={fs(18)} color={colors.accent} />
           <Text style={[styles.createText, { fontSize: fs(12) }]}>CREATE NEW PRESET</Text>
         </Pressable>

@@ -77,7 +77,10 @@ export default function SoundsScreen({ navigation }: Props) {
         {/* Section 1: Deep Work Essentials */}
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { fontSize: fs(18) }]}>Deep Work Essentials</Text>
-          <Pressable hitSlop={6}>
+          <Pressable
+            onPress={() => navigation.navigate('SettingsDetail', { title: 'Audio Library' })}
+            hitSlop={6}
+          >
             <Text style={[styles.viewAllText, { fontSize: fs(11) }]}>VIEW ALL</Text>
           </Pressable>
         </View>
@@ -88,30 +91,34 @@ export default function SoundsScreen({ navigation }: Props) {
           contentContainerStyle={styles.cardsRow}
         >
           {/* Card 1 */}
-          <ImageBackground
-            source={images.soundFocus}
-            style={[styles.albumCard, { width: sp(210), height: sp(145) }]}
-            imageStyle={styles.cardImg}
-          >
-            <View style={styles.cardScrim} />
-            <Text style={[styles.chip, { fontSize: fs(10) }]}>BINAURAL</Text>
-            <Text style={[styles.cardTitle, { fontSize: fs(15) }]} numberOfLines={1}>
-              Focus Engine 432Hz
-            </Text>
-          </ImageBackground>
+          <Pressable onPress={() => navigation.navigate('NowPlaying')}>
+            <ImageBackground
+              source={images.soundFocus}
+              style={[styles.albumCard, { width: sp(210), height: sp(145) }]}
+              imageStyle={styles.cardImg}
+            >
+              <View style={styles.cardScrim} />
+              <Text style={[styles.chip, { fontSize: fs(10) }]}>BINAURAL</Text>
+              <Text style={[styles.cardTitle, { fontSize: fs(15) }]} numberOfLines={1}>
+                Focus Engine 432Hz
+              </Text>
+            </ImageBackground>
+          </Pressable>
 
           {/* Card 2 */}
-          <ImageBackground
-            source={images.soundMidnight}
-            style={[styles.albumCard, { width: sp(210), height: sp(145) }]}
-            imageStyle={styles.cardImg}
-          >
-            <View style={styles.cardScrim} />
-            <Text style={[styles.chip, { fontSize: fs(10) }]}>AMBIENT</Text>
-            <Text style={[styles.cardTitle, { fontSize: fs(15) }]} numberOfLines={1}>
-              Midnight Library
-            </Text>
-          </ImageBackground>
+          <Pressable onPress={() => navigation.navigate('NowPlaying')}>
+            <ImageBackground
+              source={images.soundMidnight}
+              style={[styles.albumCard, { width: sp(210), height: sp(145) }]}
+              imageStyle={styles.cardImg}
+            >
+              <View style={styles.cardScrim} />
+              <Text style={[styles.chip, { fontSize: fs(10) }]}>AMBIENT</Text>
+              <Text style={[styles.cardTitle, { fontSize: fs(15) }]} numberOfLines={1}>
+                Midnight Library
+              </Text>
+            </ImageBackground>
+          </Pressable>
         </ScrollView>
 
         {/* Section 2: All Tracks */}
@@ -137,7 +144,11 @@ export default function SoundsScreen({ navigation }: Props) {
                     {track.meta}
                   </Text>
                 </View>
-                <Pressable hitSlop={8} style={styles.moreBtn}>
+                <Pressable
+                  onPress={() => navigation.navigate('SettingsDetail', { title: 'Track Details' })}
+                  hitSlop={8}
+                  style={styles.moreBtn}
+                >
                   <MoreVertical size={fs(18)} color={colors.dim} />
                 </Pressable>
               </Pressable>

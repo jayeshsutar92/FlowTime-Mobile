@@ -36,6 +36,7 @@ export default function NowPlayingScreen({ navigation }: Props) {
         </Pressable>
         <Text style={[styles.headerTitle, { fontSize: fs(17) }]}>Now Playing</Text>
         <Pressable
+          onPress={() => navigation.navigate('SettingsDetail', { title: 'Track Options' })}
           style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]}
           hitSlop={8}
         >
