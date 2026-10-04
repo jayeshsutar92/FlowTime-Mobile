@@ -22,3 +22,12 @@ backend/secrets.json
 *.key
 # Antigravity Customizations
 .agents/
+
+# FlowTime-ReactNative ignores
+FlowTime-ReactNative/**/.env
+FlowTime-ReactNative/**/build/
+FlowTime-ReactNative/**/*.apk
+FlowTime-ReactNative/**/*.aab
+FlowTime-ReactNative/**/.gradle/
+FlowTime-ReactNative/**/node_modules/
+
