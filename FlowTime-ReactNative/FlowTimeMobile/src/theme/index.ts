@@ -68,4 +68,5 @@ export const glow = {
   shadowRadius: 16,
   shadowOffset: { width: 0, height: 8 },
   elevation: 10,
+  backgroundColor: colors.primary,
 } as const;

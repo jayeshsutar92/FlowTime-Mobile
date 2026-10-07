@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { colors } from '../theme';
@@ -23,18 +23,20 @@ export function Gradient({
   borderRadius = 0,
   children,
 }: Props) {
-  const id = useId().replace(/:/g, '');
+  const id = React.useMemo(() => 'grad_' + Math.random().toString(36).slice(2), []);
   return (
     <View style={[{ borderRadius, overflow: 'hidden' }, style]}>
-      <Svg style={StyleSheet.absoluteFillObject} width="100%" height="100%">
-        <Defs>
-          <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={from} />
-            <Stop offset="1" stopColor={to} />
-          </LinearGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${id})`} />
-      </Svg>
+      <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+        <Svg width="100%" height="100%">
+          <Defs>
+            <LinearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
+              <Stop offset="0" stopColor={from} />
+              <Stop offset="1" stopColor={to} />
+            </LinearGradient>
+          </Defs>
+          <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${id})`} />
+        </Svg>
+      </View>
       {children}
     </View>
   );
