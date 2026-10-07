@@ -26,7 +26,7 @@ export function Gradient({
   const id = useId().replace(/:/g, '');
   return (
     <View style={[{ borderRadius, overflow: 'hidden' }, style]}>
-      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+      <Svg style={StyleSheet.absoluteFillObject} width="100%" height="100%">
         <Defs>
           <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
             <Stop offset="0" stopColor={from} />
