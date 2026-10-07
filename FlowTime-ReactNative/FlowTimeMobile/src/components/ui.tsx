@@ -300,7 +300,7 @@ export const Input = React.forwardRef<TextInput, TextInputProps>(function Input(
   return (
     <TextInput
       ref={ref}
-      placeholderTextColor={alpha('#8E97AD', 0.6)}
+      placeholderTextColor={alpha(colors.mutedForeground, 0.6)}
       selectionColor={colors.primary}
       {...props}
       onFocus={(e) => {
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 6,
     borderRadius: 3,
-    backgroundColor: alpha('#8E97AD', 0.25),
+    backgroundColor: alpha(colors.mutedForeground, 0.25),
     marginBottom: 20,
   },
   segmented: {

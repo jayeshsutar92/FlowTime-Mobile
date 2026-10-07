@@ -70,7 +70,7 @@ export function AdminScreen() {
                 <View
                   style={[
                     styles.status,
-                    { backgroundColor: u.active ? colors.success : alpha('#8E97AD', 0.4) },
+                    { backgroundColor: u.active ? colors.success : alpha(colors.mutedForeground, 0.4) },
                   ]}
                 />
               </View>

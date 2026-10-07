@@ -140,7 +140,7 @@ export function ContributionsScreen() {
                     styles.check,
                     item.done
                       ? { borderColor: colors.success, backgroundColor: colors.success }
-                      : { borderColor: alpha('#8E97AD', 0.4) },
+                      : { borderColor: alpha(colors.mutedForeground, 0.4) },
                   ]}
                 >
                   {item.done && <Check size={16} strokeWidth={3} color={colors.successForeground} />}
