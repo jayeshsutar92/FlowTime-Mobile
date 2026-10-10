@@ -12,7 +12,7 @@ export const colors = {
   mutedForeground: '#8E97AD',
   primary: '#3F74F0',
   primaryForeground: '#FAFBFE',
-  accent: '#6D4EF0',
+  accent: '#22C58A',
   destructive: '#E5484D',
   success: '#22C58A',
   successForeground: '#0B2219',
@@ -21,7 +21,7 @@ export const colors = {
   input: 'rgba(255,255,255,0.10)',
   ring: '#3F74F0',
   gradientStart: '#4A80F7',
-  gradientEnd: '#5B3EE6',
+  gradientEnd: '#245EE0',
 } as const;
 
 /** Apply an alpha (0–1) to a #RRGGBB colour. */
