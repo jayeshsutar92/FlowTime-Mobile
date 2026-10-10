@@ -38,10 +38,7 @@ export function AuthScreen() {
               <View style={styles.logoDot} />
             </Gradient>
             <Text variant="display" size={24}>FlowTime</Text>
-            <View style={styles.row}>
-              <Sparkles size={12} color={colors.warning} />
-              <Text size={12} weight="medium" color={colors.mutedForeground}>Now in early access</Text>
-            </View>
+
           </View>
 
           <View style={styles.card}>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { ChevronLeft, Pause, Play, RotateCcw, Sparkles, Timer as TimerIcon } from 'lucide-react-native';
+import { ChevronLeft, Pause, Play, RotateCcw, SkipForward, Sparkles, Timer as TimerIcon } from 'lucide-react-native';
 import { colors, alpha, glow, radius } from '../theme';
 import {
   ButtonLabel,
@@ -128,6 +128,11 @@ function RunningTimer({ config, onChange }: { config: PhaseMinutes; onChange: ()
   const [intention, setIntention] = useState('');
   const cycle = 1;
 
+  const skipPhase = () => {
+    const nextPhase = phase === 'Focus' ? 'Break' : 'Focus';
+    pickPhase(nextPhase);
+  };
+
   const total = minutes * 60;
   const progress = total === 0 ? 0 : 1 - secondsLeft / total;
 
@@ -190,12 +195,7 @@ function RunningTimer({ config, onChange }: { config: PhaseMinutes; onChange: ()
         <BackLink label="Change timer" onPress={onChange} />
       </View>
 
-      {/* Phase pills */}
-      <View style={styles.rowFull}>
-        {PHASES.map((p) => (
-          <Chip key={p} label={p} active={phase === p} onPress={() => pickPhase(p)} />
-        ))}
-      </View>
+
 
       {/* Ring */}
       <View style={{ marginTop: 40, width: SIZE, height: SIZE }}>
@@ -257,38 +257,12 @@ function RunningTimer({ config, onChange }: { config: PhaseMinutes; onChange: ()
             )}
           </Gradient>
         </Press>
-        <Press onPress={() => setSheetOpen(true)} accessibilityLabel="Timer options" style={styles.smallCtl}>
-          <Sparkles size={20} color={colors.mutedForeground} />
+        <Press onPress={skipPhase} accessibilityLabel="Skip phase" style={styles.smallCtl}>
+          <SkipForward size={20} color={colors.mutedForeground} />
         </Press>
       </View>
 
-      {/* Quick durations */}
-      <View style={{ marginTop: 40, alignSelf: 'stretch' }}>
-        <Text variant="label" style={{ marginBottom: 10 }}>Quick durations</Text>
-        <View style={styles.rowFull}>
-          {QUICK.map((m) => (
-            <Chip
-              key={m}
-              mono
-              label={`${m}m`}
-              active={minutes === m}
-              onPress={() => applyDuration(m)}
-              style={{ borderRadius: radius['2xl'], paddingVertical: 12, backgroundColor: minutes === m ? alpha(colors.primary, 0.15) : colors.card }}
-            />
-          ))}
-        </View>
-      </View>
 
-      {/* Session intention */}
-      <Card style={{ marginTop: 24, alignSelf: 'stretch' }}>
-        <Text variant="display" size={14}>Session intention</Text>
-        <Input
-          placeholder="What are you focusing on?"
-          value={intention}
-          onChangeText={setIntention}
-          style={{ marginTop: 12 }}
-        />
-      </Card>
 
       <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Choose your timer">
         <View style={{ gap: 12 }}>

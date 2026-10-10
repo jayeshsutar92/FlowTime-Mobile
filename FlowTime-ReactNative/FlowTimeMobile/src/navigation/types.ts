@@ -11,6 +11,7 @@ export type AppTabParamList = {
 };
 
 export type RootStackParamList = {
+  Onboarding: undefined;
   Auth: undefined;
   App: NavigatorScreenParams<AppTabParamList>;
 };
